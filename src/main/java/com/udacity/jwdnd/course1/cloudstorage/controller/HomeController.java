@@ -116,21 +116,29 @@ public class HomeController {
     @PostMapping("/file/upload")
     public String uploadFile(@ModelAttribute MultipartFile fileUpload, Model model) throws IOException, SQLException {
         double size = Double.parseDouble(fileUpload.getSize() + "");
+        System.out.println(size);
         int MAX_FILE_SIZE = 4000000;
-        if (size > 0 && size < MAX_FILE_SIZE) {
-            int rowsUpdated = fileService.uploadFile(fileUpload);
+        try {
+            if (size > 0 && size < MAX_FILE_SIZE) {
+                int rowsUpdated = fileService.uploadFile(fileUpload);
 
-            String errorMessage = null;
-            if (rowsUpdated < 0) {
-                errorMessage = "The file name is existing. Please try another file or name.";
-            }
-            if (errorMessage == null) {
-                model.addAttribute("changeSuccess", true);
+                String errorMessage = null;
+                if (rowsUpdated < 0) {
+                    errorMessage = "The file name is existing. Please try another file or name.";
+                }
+                if (errorMessage == null) {
+                    model.addAttribute("changeSuccess", true);
+                } else {
+                    model.addAttribute("changeError", errorMessage);
+                }
             } else {
-                model.addAttribute("changeError", errorMessage);
+                model.addAttribute("changeError", "File size exceeds the limit.");
             }
-        } else {
-            model.addAttribute("changeError", "File size exceeds the limit.");
+        }
+        catch (IOException ex)
+        {
+            model.addAttribute("changeError", "Error: " + ex.getMessage());
+
         }
 
         return "result";
